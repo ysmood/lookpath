@@ -1,12 +1,14 @@
 // Copyright 2010 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+// +build windows
 
 package lookpath
 
 import (
 	"errors"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 )
@@ -50,8 +52,8 @@ func findExecutable(file string, exts []string) (string, error) {
 	return "", os.ErrNotExist
 }
 
-// LookPath searches for an executable binary named file
-// in the directories named by the PATH environment variable.
+// LookPath searches for an executable named file in the
+// directories named by the PATH environment variable.
 // If file contains a slash, it is tried directly and the PATH is not consulted.
 // LookPath also uses PATHEXT environment variable to match
 // a suitable candidate.
@@ -77,7 +79,7 @@ func LookPath(path, file string) (string, error) {
 		if f, err := findExecutable(file, exts); err == nil {
 			return f, nil
 		} else {
-			return "", &Error{file, err}
+			return "", &exec.Error{file, err}
 		}
 	}
 	if f, err := findExecutable(filepath.Join(".", file), exts); err == nil {
@@ -88,5 +90,5 @@ func LookPath(path, file string) (string, error) {
 			return f, nil
 		}
 	}
-	return "", &Error{file, ErrNotFound}
+	return "", &exec.Error{file, ErrNotFound}
 }
